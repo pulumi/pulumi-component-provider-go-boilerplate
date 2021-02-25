@@ -12,6 +12,8 @@ An example of using the `StaticPage` component in TypeScript is in `examples/sim
 
 Note that the generated provider plugin (`pulumi-resource-xyz`) must be on your `PATH` to be used by Pulumi deployments. If creating a provider for distribution to other users, you should ensure they install this plugin to their `PATH`.
 
+> Note: Authoring a component provider is currently fairly "low-level" and involves a number of manual steps.  Over the coming weeks and months, we will be improving the authoring and publishing experience in several dimensions.  If you are implementing Pulumi components using this provider, please do share feedback at https://github.com/pulumi/pulumi/issues/new or on the [Pulumi Community Slack](https://slack.pulumi.com).
+
 ## Prerequisites
 
 - Go 1.15
@@ -24,8 +26,11 @@ Note that the generated provider plugin (`pulumi-resource-xyz`) must be on your 
 ## Build and Test
 
 ```bash
-# Build and install the provider (plugin copied to $GOPATH/bin)
+# Build and install the provider (plugin copied to ./bin)
 make install_provider
+
+# Add ./bin to PATH
+export PATH=$(pwd)/bin:$PATH
 
 # Regenerate SDKs
 make generate
@@ -142,6 +147,8 @@ func NewStaticPage(ctx *pulumi.Context, name string, args *StaticPageArgs, opts 
 }
 ```
 
+All inputs to a component should be `Input`s, as callers from any language are allowed to pass `Output` values to any input property - which may be unknown during previews, or may be secret values during previews or updates.
+
 The provider makes this component resource available in the `Construct` function in `provider/pkg/provider/provider.go`. When `Construct` is called and the `typ` argument is `xyz:index:StaticPage`, we create an instance of the `StaticPage` component resource and return its `URN` and outputs as its state.
 
 
@@ -172,3 +179,33 @@ func constructStaticPage(ctx *pulumi.Context, name string, inputs *pulumi.Constr
 	}, nil
 }
 ```
+
+## Publishing
+
+To share your provider with others, you will distribute the SDKs for each language, as well as the provider binary. 
+
+To publish the SDKs, build them and then use the corresponding package manager tools for each language.
+
+```bash
+### Build the Node.JS SDK into an NPM package in sdk/nodejs/bin.  You can then `npm publish` the resulting package.
+make build_nodejs_sdk
+
+### Build the .NET SDK into a NuGet package in sdk/dotnet/bin/Debug/.  You can then `dotnet nuget push` the resulting package.
+make build_dotnet_sdk
+
+### Build the Python SDK into a Python package in sdk/python/bin/dist.  You can then `twine upload` the resulting package.
+make build_python_sdk
+
+### For Go, you do not need to build a package.  The SDK will be referenced directly from this GitHub repository at
+### ```go
+### import "github.com/pulumi/pulumi-xyz/sdk/xyz"
+### ```
+```
+
+The plugin binary is built to `./bin/pulumi-resource-xyz` and users must arrange for it to be on their `PATH` prior to running Pulumi programs using the component.
+
+## Troubleshooting
+
+### `error: no resource plugin 'xyz-v0.0.1' found in the workspace or on your $PATH, install the plugin using `pulumi plugin install resource xyz v0.0.1`
+
+Make sure you have `./bin` added to your `PATH`.  The `pulumi-resource-xyz` provider binary will be built there, and must be available on `PATH`.
