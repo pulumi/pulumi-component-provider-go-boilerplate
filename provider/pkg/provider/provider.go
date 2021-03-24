@@ -28,7 +28,7 @@ func makeProviderArgs(schema []byte) pulumi.ProviderArgs {
 
 			// TODO: Add support for additional component resources here.
 			switch typ {
-			case "xyz:index:StaticPage":
+			case "apigateway:index:StaticPage":
 				return constructStaticPage(ctx, name, inputs, options)
 			default:
 				return pulumi.ConstructResult{}, errors.Errorf("unknown resource type %s", typ)
