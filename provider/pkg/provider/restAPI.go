@@ -19,29 +19,29 @@ import (
 	"github.com/pulumi/pulumi/sdk/v2/go/pulumi"
 )
 
-// The set of arguments for creating a StaticPage component resource.
-type StaticPageArgs struct {
+// The set of arguments for creating a RestAPI component resource.
+type RestAPIArgs struct {
 	// The HTML content for index.html.
 	IndexContent pulumi.StringInput `pulumi:"indexContent"`
 }
 
-// The StaticPage component resource.
-type StaticPage struct {
+// The RestAPI component resource.
+type RestAPI struct {
 	pulumi.ResourceState
 
 	Bucket     *s3.Bucket          `pulumi:"bucket"`
 	WebsiteUrl pulumi.StringOutput `pulumi:"websiteUrl"`
 }
 
-// NewStaticPage creates a new StaticPage component resource.
-func NewStaticPage(ctx *pulumi.Context,
-	name string, args *StaticPageArgs, opts ...pulumi.ResourceOption) (*StaticPage, error) {
+// NewRestAPI creates a new RestAPI component resource.
+func NewRestAPI(ctx *pulumi.Context,
+	name string, args *RestAPIArgs, opts ...pulumi.ResourceOption) (*RestAPI, error) {
 	if args == nil {
-		args = &StaticPageArgs{}
+		args = &RestAPIArgs{}
 	}
 
-	component := &StaticPage{}
-	err := ctx.RegisterComponentResource("apigateway:index:StaticPage", name, component, opts...)
+	component := &RestAPI{}
+	err := ctx.RegisterComponentResource("apigateway:index:RestAPI", name, component, opts...)
 	if err != nil {
 		return nil, err
 	}

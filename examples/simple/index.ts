@@ -1,8 +1,16 @@
 import * as apigateway from "@pulumi/apigateway";
+import * as aws from "@pulumi/aws";
 
-const page = new apigateway.StaticPage("page", {
-    indexContent: "<html><body><p>Hello world!</p></body></html>",
+const f = new aws.lambda.Function("f", {
+
 });
 
-export const bucket = page.bucket;
-export const url = page.websiteUrl;
+const api = new apigateway.RestAPI("api", {
+    routes: [{
+        path: "/",
+        method: "GET",
+        function: f,
+    }],
+});
+
+export const url = api.url;
