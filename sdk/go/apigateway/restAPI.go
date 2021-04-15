@@ -23,7 +23,7 @@ type RestAPI struct {
 func NewRestAPI(ctx *pulumi.Context,
 	name string, args *RestAPIArgs, opts ...pulumi.ResourceOption) (*RestAPI, error) {
 	if args == nil {
-		return nil, errors.New("missing one or more required arguments")
+		return nil, errors.New("missing one or more required arguments!!")
 	}
 
 	if args.Routes == nil {

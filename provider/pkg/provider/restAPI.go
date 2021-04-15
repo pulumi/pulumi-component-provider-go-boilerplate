@@ -15,22 +15,63 @@
 package provider
 
 import (
-	"github.com/pulumi/pulumi-aws/sdk/v3/go/aws/s3"
+	"context"
+	"crypto/sha1"
+	"encoding/hex"
+	"encoding/json"
+	"fmt"
+	"reflect"
+
+	"github.com/pulumi/pulumi-aws/sdk/v3/go/aws/apigateway"
 	"github.com/pulumi/pulumi/sdk/v2/go/pulumi"
 )
 
 // The set of arguments for creating a RestAPI component resource.
 type RestAPIArgs struct {
-	// The HTML content for index.html.
-	IndexContent pulumi.StringInput `pulumi:"indexContent"`
+	Routes RestAPIRouteArrayInput `pulumi:"routes"`
+}
+
+type RestAPIRouteArrayInput interface {
+	pulumi.Input
+	ToRestAPIRouteArrayOutput() RestAPIRouteArrayOutput
+	ToRestAPIRouteArrayOutputWithContext(ctx context.Context) RestAPIRouteArrayOutput
+}
+
+type RestAPIRouteArrayOutput struct{ *pulumi.OutputState }
+
+func (o RestAPIRouteArrayOutput) ToRestAPIRouteArrayOutput() RestAPIRouteArrayOutput {
+	return o
+}
+
+func (o RestAPIRouteArrayOutput) ToRestAPIRouteArrayOutputWithContext(ctx context.Context) RestAPIRouteArrayOutput {
+	return o
+}
+
+func (RestAPIRouteArrayOutput) ElementType() reflect.Type {
+	return reflect.TypeOf((*[]RestAPIRoute)(nil)).Elem()
+}
+
+type RestAPIRoute struct {
+	// Path     string
+	// Method   string
+	// Function *lambda.Function
+}
+
+func init() {
+	pulumi.RegisterOutputType(RestAPIRouteArrayOutput{})
 }
 
 // The RestAPI component resource.
 type RestAPI struct {
 	pulumi.ResourceState
 
-	Bucket     *s3.Bucket          `pulumi:"bucket"`
-	WebsiteUrl pulumi.StringOutput `pulumi:"websiteUrl"`
+	name   string
+	ctx    *pulumi.Context
+	parent pulumi.ResourceOption
+
+	API   *apigateway.RestApi `pulumi:"api"`
+	Stage *apigateway.Stage   `pulumi:"stage"`
+	Url   pulumi.StringOutput `pulumi:"url"`
 }
 
 // NewRestAPI creates a new RestAPI component resource.
@@ -40,63 +81,98 @@ func NewRestAPI(ctx *pulumi.Context,
 		args = &RestAPIArgs{}
 	}
 
-	component := &RestAPI{}
-	err := ctx.RegisterComponentResource("apigateway:index:RestAPI", name, component, opts...)
+	r := &RestAPI{
+		ctx:  ctx,
+		name: name,
+	}
+	r.parent = pulumi.Parent(r)
+	err := ctx.RegisterComponentResource("apigateway:index:RestAPI", name, r, opts...)
 	if err != nil {
 		return nil, err
 	}
 
-	// Create a bucket and expose a website index document.
-	bucket, err := s3.NewBucket(ctx, name, &s3.BucketArgs{
-		Website: s3.BucketWebsiteArgs{
-			IndexDocument: pulumi.String("index.html"),
-		},
-	}, pulumi.Parent(component))
+	swagger, err := r.createSwaggerSpec(args.Routes)
 	if err != nil {
 		return nil, err
 	}
 
-	// Create a bucket object for the index document.
-	if _, err := s3.NewBucketObject(ctx, name, &s3.BucketObjectArgs{
-		Bucket:      bucket.ID(),
-		Key:         pulumi.String("index.html"),
-		Content:     args.IndexContent,
-		ContentType: pulumi.String("text/html"),
-	}, pulumi.Parent(bucket)); err != nil {
+	restApi, err := apigateway.NewRestApi(ctx, name, &apigateway.RestApiArgs{
+		BinaryMediaTypes: pulumi.StringArray{pulumi.String("*/*")},
+		Body:             swagger,
+	}, pulumi.Parent(r))
+	if err != nil {
 		return nil, err
 	}
 
-	// Set the access policy for the bucket so all objects are readable.
-	if _, err := s3.NewBucketPolicy(ctx, "bucketPolicy", &s3.BucketPolicyArgs{
-		Bucket: bucket.ID(),
-		Policy: pulumi.Any(map[string]interface{}{
-			"Version": "2012-10-17",
-			"Statement": []map[string]interface{}{
-				{
-					"Effect":    "Allow",
-					"Principal": "*",
-					"Action": []interface{}{
-						"s3:GetObject",
-					},
-					"Resource": []interface{}{
-						pulumi.Sprintf("arn:aws:s3:::%s/*", bucket.ID()), // policy refers to bucket name explicitly
-					},
-				},
-			},
-		}),
-	}, pulumi.Parent(bucket)); err != nil {
+	version := swagger.ToStringOutput().ApplyT(func(s string) (string, error) {
+		h := sha1.New()
+		h.Write([]byte(s))
+		sha1_hash := hex.EncodeToString(h.Sum(nil))
+		return sha1_hash[0:8], nil
+	}).(pulumi.StringOutput)
+
+	// Create a deployment of the Rest API.
+	deployment, err := apigateway.NewDeployment(ctx, name, &apigateway.DeploymentArgs{
+		RestApi: restApi,
+		// Note: Set to empty to avoid creating an implicit stage, we'll create it explicitly below instead.
+		StageName: pulumi.String(""),
+		// Note: We set `variables` here because it forces recreation of the Deployment object
+		// whenever the body hash changes.  Because we use a blank stage name above, there will
+		// not actually be any stage created in AWS, and thus these variables will not actually
+		// end up anywhere.  But this will still cause the right replacement of the Deployment
+		// when needed.  The Stage allocated below will be the stable stage that always points
+		// to the latest deployment of the API.
+		Variables: pulumi.StringMap{"version": version},
+	}, pulumi.Parent(r))
+	if err != nil {
 		return nil, err
 	}
 
-	component.Bucket = bucket
-	component.WebsiteUrl = bucket.WebsiteEndpoint
+	// this.swaggerLambdas = swaggerLambdas || new Map();
+	// const permissions = createLambdaPermissions(this, name, this.swaggerLambdas);
 
-	if err := ctx.RegisterResourceOutputs(component, pulumi.Map{
-		"bucket":     bucket,
-		"websiteUrl": bucket.WebsiteEndpoint,
+	// // Create a stage, which is an addressable instance of the Rest API. Set it to point at the latest deployment.
+	stage, err := apigateway.NewStage(ctx, name, &apigateway.StageArgs{
+		StageName:  pulumi.String("stage"),
+		RestApi:    restApi,
+		Deployment: deployment,
+		// TODO: `dependsOn: permissions`
+	}, pulumi.Parent(r))
+	if err != nil {
+		return nil, err
+	}
+
+	r.API = restApi
+	r.Stage = stage
+	r.Url = pulumi.Sprintf("%sstage/", deployment.InvokeUrl)
+
+	if err := ctx.RegisterResourceOutputs(r, pulumi.Map{
+		"url": r.Url,
 	}); err != nil {
 		return nil, err
 	}
 
-	return component, nil
+	return r, nil
+}
+
+func (r *RestAPI) createSwaggerSpec(routes RestAPIRouteArrayInput) (pulumi.StringOutput, error) {
+	return routes.ToRestAPIRouteArrayOutput().ApplyT(func(routes []RestAPIRoute) (string, error) {
+		swagger := swaggerSpec{
+			Swagger: "2.0",
+			Info: swaggerInfo{
+				Title:   r.name,
+				Version: "1.0",
+			},
+			Paths: map[string]map[string]swaggerOperation{},
+		}
+		for route := range routes {
+			r.ctx.Log.Info(fmt.Sprintf("%v", route), nil)
+		}
+		byts, err := json.Marshal(swagger)
+		if err != nil {
+			return "", err
+		}
+		return string(byts), nil
+	}).(pulumi.StringOutput), nil
+
 }

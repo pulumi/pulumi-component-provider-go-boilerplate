@@ -12,8 +12,8 @@ namespace Pulumi.Apigateway
     [ApigatewayResourceType("apigateway:index:RestAPI")]
     public partial class RestAPI : Pulumi.ComponentResource
     {
-        [Output("restAPI")]
-        public Output<Pulumi.Aws.ApiGateway.RestApi> RestAPI { get; private set; } = null!;
+        [Output("api")]
+        public Output<Pulumi.Aws.ApiGateway.RestApi> Api { get; private set; } = null!;
 
         [Output("url")]
         public Output<string> Url { get; private set; } = null!;

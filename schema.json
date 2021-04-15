@@ -34,13 +34,13 @@
                 "url": {
                     "type": "string"
                 },
-                "restAPI": {
+                "api": {
                     "$ref": "/aws/v3.30.0/schema.json#/resources/aws:apigateway%2FrestApi:RestApi"
                 }
             },
             "required": [
                 "url",
-                "restAPI"
+                "api"
             ]
         }
     },

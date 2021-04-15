@@ -51,17 +51,18 @@ func constructRestAPI(ctx *pulumi.Context, name string, inputs *pulumi.Construct
 	}
 
 	// Create the component resource.
-	RestAPI, err := NewRestAPI(ctx, name, args, options)
+	restAPI, err := NewRestAPI(ctx, name, args, options)
 	if err != nil {
 		return pulumi.ConstructResult{}, errors.Wrap(err, "creating component")
 	}
 
 	// Return the component resource's URN and outputs as its state.
 	return pulumi.ConstructResult{
-		URN: RestAPI.URN(),
+		URN: restAPI.URN(),
 		State: pulumi.Map{
-			"bucket":     RestAPI.Bucket,
-			"websiteUrl": RestAPI.WebsiteUrl,
+			"url":   restAPI.Url,
+			"api":   restAPI.API,
+			"stage": restAPI.Stage,
 		},
 	}, nil
 }

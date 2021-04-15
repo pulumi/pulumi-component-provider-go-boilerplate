@@ -22,7 +22,7 @@ export class RestAPI extends pulumi.ComponentResource {
         return obj['__pulumiType'] === RestAPI.__pulumiType;
     }
 
-    public /*out*/ readonly restAPI!: pulumi.Output<aws.apigateway.RestApi>;
+    public /*out*/ readonly api!: pulumi.Output<aws.apigateway.RestApi>;
     public /*out*/ readonly url!: pulumi.Output<string>;
 
     /**
@@ -40,10 +40,10 @@ export class RestAPI extends pulumi.ComponentResource {
                 throw new Error("Missing required property 'routes'");
             }
             inputs["routes"] = args ? args.routes : undefined;
-            inputs["restAPI"] = undefined /*out*/;
+            inputs["api"] = undefined /*out*/;
             inputs["url"] = undefined /*out*/;
         } else {
-            inputs["restAPI"] = undefined /*out*/;
+            inputs["api"] = undefined /*out*/;
             inputs["url"] = undefined /*out*/;
         }
         if (!opts.version) {

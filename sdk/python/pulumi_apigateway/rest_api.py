@@ -48,7 +48,7 @@ class RestAPI(pulumi.ComponentResource):
             if routes is None and not opts.urn:
                 raise TypeError("Missing required property 'routes'")
             __props__['routes'] = routes
-            __props__['rest_api'] = None
+            __props__['api'] = None
             __props__['url'] = None
         super(RestAPI, __self__).__init__(
             'apigateway:index:RestAPI',
@@ -58,9 +58,9 @@ class RestAPI(pulumi.ComponentResource):
             remote=True)
 
     @property
-    @pulumi.getter(name="restAPI")
-    def rest_api(self) -> pulumi.Output['pulumi_aws.apigateway.RestApi']:
-        return pulumi.get(self, "rest_api")
+    @pulumi.getter
+    def api(self) -> pulumi.Output['pulumi_aws.apigateway.RestApi']:
+        return pulumi.get(self, "api")
 
     @property
     @pulumi.getter
