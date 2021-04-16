@@ -7,24 +7,24 @@ import pulumi
 import pulumi.runtime
 from typing import Any, Mapping, Optional, Sequence, Union
 from . import _utilities, _tables
-from ._inputs import *
 import pulumi_aws
 
-__all__ = ['RestAPI']
+__all__ = ['StaticPage']
 
 
-class RestAPI(pulumi.ComponentResource):
+class StaticPage(pulumi.ComponentResource):
     def __init__(__self__,
                  resource_name: str,
                  opts: Optional[pulumi.ResourceOptions] = None,
-                 routes: Optional[pulumi.Input[Sequence[pulumi.Input[pulumi.InputType['EventHandlerRouteArgs']]]]] = None,
+                 index_content: Optional[pulumi.Input[str]] = None,
                  __props__=None,
                  __name__=None,
                  __opts__=None):
         """
-        Create a RestAPI resource with the given unique name, props, and options.
+        Create a StaticPage resource with the given unique name, props, and options.
         :param str resource_name: The name of the resource.
         :param pulumi.ResourceOptions opts: Options for the resource.
+        :param pulumi.Input[str] index_content: The HTML content for index.html.
         """
         if __name__ is not None:
             warnings.warn("explicit use of __name__ is deprecated", DeprecationWarning)
@@ -45,13 +45,13 @@ class RestAPI(pulumi.ComponentResource):
                 raise TypeError('__props__ is only valid when passed in combination with a valid opts.id to get an existing resource')
             __props__ = dict()
 
-            if routes is None and not opts.urn:
-                raise TypeError("Missing required property 'routes'")
-            __props__['routes'] = routes
-            __props__['api'] = None
-            __props__['url'] = None
-        super(RestAPI, __self__).__init__(
-            'apigateway:index:RestAPI',
+            if index_content is None and not opts.urn:
+                raise TypeError("Missing required property 'index_content'")
+            __props__['index_content'] = index_content
+            __props__['bucket'] = None
+            __props__['website_url'] = None
+        super(StaticPage, __self__).__init__(
+            'xyz:index:StaticPage',
             resource_name,
             __props__,
             opts,
@@ -59,13 +59,19 @@ class RestAPI(pulumi.ComponentResource):
 
     @property
     @pulumi.getter
-    def api(self) -> pulumi.Output['pulumi_aws.apigateway.RestApi']:
-        return pulumi.get(self, "api")
+    def bucket(self) -> pulumi.Output['pulumi_aws.s3.Bucket']:
+        """
+        The bucket resource.
+        """
+        return pulumi.get(self, "bucket")
 
     @property
-    @pulumi.getter
-    def url(self) -> pulumi.Output[str]:
-        return pulumi.get(self, "url")
+    @pulumi.getter(name="websiteUrl")
+    def website_url(self) -> pulumi.Output[str]:
+        """
+        The website URL.
+        """
+        return pulumi.get(self, "website_url")
 
     def translate_output_property(self, prop):
         return _tables.CAMEL_TO_SNAKE_CASE_TABLE.get(prop) or prop

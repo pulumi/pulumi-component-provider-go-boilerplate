@@ -1,22 +1,8 @@
-import * as apigateway from "@pulumi/apigateway";
-import * as aws from "@pulumi/aws";
+import * as xyz from "@pulumi/xyz";
 
-const f = new aws.lambda.CallbackFunction("f", {
-    callback: async (ev, ctx) => {
-        console.log(JSON.stringify(ev));
-        return {
-            statusCode: 200,
-            body: "hello",
-        };
-    },
-})
-
-const api = new apigateway.RestAPI("api", {
-    routes: [{
-        path: "/",
-        method: "GET",
-        function: f,
-    }],
+const page = new xyz.StaticPage("page", {
+    indexContent: "<html><body><p>Hello world!</p></body></html>",
 });
 
-export const url = api.url;
+export const bucket = page.bucket;
+export const url = page.websiteUrl;

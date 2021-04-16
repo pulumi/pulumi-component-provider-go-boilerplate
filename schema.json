@@ -1,46 +1,30 @@
 {
-    "name": "apigateway",
-    "types": {
-        "apigateway:index:EventHandlerRoute": {
-            "type": "object",
-            "properties": {
-                "path": {
-                    "type": "string"
-                },
-                "method": {
-                    "type": "string"
-                },
-                "function": {
-                    "$ref": "/aws/v3.30.0/schema.json#/resources/aws:lambda%2Ffunction:Function"
-                }
-            }
-        }
-    },
+    "name": "xyz",
     "resources": {
-        "apigateway:index:RestAPI": {
+        "xyz:index:StaticPage": {
             "isComponent": true,
             "inputProperties": {
-                "routes": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/types/apigateway:index:EventHandlerRoute"
-                    }
+                "indexContent": {
+                    "type": "string",
+                    "description": "The HTML content for index.html."
                 }
             },
             "requiredInputs": [
-                "routes"
+                "indexContent"
             ],
             "properties": {
-                "url": {
-                    "type": "string"
+                "bucket": {
+                    "$ref": "/aws/v3.30.0/schema.json#/resources/aws:s3%2Fbucket:Bucket",
+                    "description": "The bucket resource."
                 },
-                "api": {
-                    "$ref": "/aws/v3.30.0/schema.json#/resources/aws:apigateway%2FrestApi:RestApi"
+                "websiteUrl": {
+                    "type": "string",
+                    "description": "The website URL."
                 }
             },
             "required": [
-                "url",
-                "api"
+                "bucket",
+                "websiteUrl"
             ]
         }
     },
@@ -53,7 +37,7 @@
         },
         "go": {
             "generateResourceContainerTypes": true,
-            "importBasePath": "github.com/pulumi/pulumi-apigateway/sdk/go/apigateway"
+            "importBasePath": "github.com/pulumi/pulumi-xyz/sdk/go/xyz"
         },
         "nodejs": {
             "dependencies": {

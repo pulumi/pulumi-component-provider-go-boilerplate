@@ -28,8 +28,8 @@ func makeProviderArgs(schema []byte) pulumi.ProviderArgs {
 
 			// TODO: Add support for additional component resources here.
 			switch typ {
-			case "apigateway:index:RestAPI":
-				return constructRestAPI(ctx, name, inputs, options)
+			case "xyz:index:StaticPage":
+				return constructStaticPage(ctx, name, inputs, options)
 			default:
 				return pulumi.ConstructResult{}, errors.Errorf("unknown resource type %s", typ)
 			}
@@ -37,32 +37,31 @@ func makeProviderArgs(schema []byte) pulumi.ProviderArgs {
 	}
 }
 
-// constructRestAPI is an implementation of Construct for the example RestAPI component.
+// constructStaticPage is an implementation of Construct for the example StaticPage component.
 // It demonstrates converting the raw ConstructInputs to the component's args struct, creating
 // the component, and returning its URN and state (outputs).
-func constructRestAPI(ctx *pulumi.Context, name string, inputs *pulumi.ConstructInputs,
+func constructStaticPage(ctx *pulumi.Context, name string, inputs *pulumi.ConstructInputs,
 	options pulumi.ResourceOption) (pulumi.ConstructResult, error) {
 
-	// Copy the raw inputs to RestAPIArgs. `inputs.SetArgs` uses the types and `pulumi:` tags
+	// Copy the raw inputs to StaticPageArgs. `inputs.SetArgs` uses the types and `pulumi:` tags
 	// on the struct's fields to convert the raw values to the appropriate Input types.
-	args := &RestAPIArgs{}
+	args := &StaticPageArgs{}
 	if err := inputs.SetArgs(args); err != nil {
 		return pulumi.ConstructResult{}, errors.Wrap(err, "setting args")
 	}
 
 	// Create the component resource.
-	restAPI, err := NewRestAPI(ctx, name, args, options)
+	staticPage, err := NewStaticPage(ctx, name, args, options)
 	if err != nil {
 		return pulumi.ConstructResult{}, errors.Wrap(err, "creating component")
 	}
 
 	// Return the component resource's URN and outputs as its state.
 	return pulumi.ConstructResult{
-		URN: restAPI.URN(),
+		URN: staticPage.URN(),
 		State: pulumi.Map{
-			"url":   restAPI.Url,
-			"api":   restAPI.API,
-			"stage": restAPI.Stage,
+			"bucket":     staticPage.Bucket,
+			"websiteUrl": staticPage.WebsiteUrl,
 		},
 	}, nil
 }

@@ -1,6 +1,6 @@
 VERSION         := 0.0.1
 
-PACK            := apigateway
+PACK            := xyz
 PROJECT         := github.com/pulumi/pulumi-${PACK}
 
 PROVIDER        := pulumi-resource-${PACK}
@@ -31,7 +31,7 @@ install_provider:: build_provider
 # Go SDK
 
 gen_go_sdk::
-	rm -rf sdk/go
+	rm -rf go
 	cd provider/cmd/${CODEGEN} && go run . go ../../../sdk/go ${SCHEMA_PATH}
 
 
