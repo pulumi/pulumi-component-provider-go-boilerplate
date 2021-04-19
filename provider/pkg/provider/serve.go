@@ -15,8 +15,8 @@
 package provider
 
 import (
-	"github.com/pulumi/pulumi/sdk/v2/go/common/util/cmdutil"
-	"github.com/pulumi/pulumi/sdk/v2/go/pulumi"
+	"github.com/pulumi/pulumi/sdk/v3/go/common/util/cmdutil"
+	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
 
 func Serve(providerName, version string, schema []byte) {
