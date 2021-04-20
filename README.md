@@ -142,33 +142,29 @@ func NewStaticPage(ctx *pulumi.Context, name string, args *StaticPageArgs, opts 
 }
 ```
 
-The provider makes this component resource available in the `Construct` function in `provider/pkg/provider/provider.go`. When `Construct` is called and the `typ` argument is `xyz:index:StaticPage`, we create an instance of the `StaticPage` component resource and return its `URN` and outputs as its state.
+The provider makes this component resource available in the `construct` function in `provider/pkg/provider/provider.go`. When `construct` is called and the `typ` argument is `xyz:index:StaticPage`, we create an instance of the `StaticPage` component resource and return its `URN` and state.
 
 
 ```go
-func constructStaticPage(ctx *pulumi.Context, name string, inputs *pulumi.ConstructInputs,
-	options pulumi.ResourceOption) (pulumi.ConstructResult, error) {
+func constructStaticPage(ctx *pulumi.Context, name string, inputs provider.ConstructInputs,
+	options pulumi.ResourceOption) (*provider.ConstructResult, error) {
 
-	// Copy the raw inputs to StaticPageArgs. `inputs.SetArgs` uses the types and `pulumi:` tags
+	// Copy the raw inputs to StaticPageArgs. `inputs.CopyTo` uses the types and `pulumi:` tags
 	// on the struct's fields to convert the raw values to the appropriate Input types.
 	args := &StaticPageArgs{}
-	if err := inputs.SetArgs(args); err != nil {
-		return pulumi.ConstructResult{}, errors.Wrap(err, "setting args")
+	if err := inputs.CopyTo(args); err != nil {
+		return nil, errors.Wrap(err, "setting args")
 	}
 
 	// Create the component resource.
 	staticPage, err := NewStaticPage(ctx, name, args, options)
 	if err != nil {
-		return pulumi.ConstructResult{}, errors.Wrap(err, "creating component")
+		return nil, errors.Wrap(err, "creating component")
 	}
 
-	// Return the component resource's URN and outputs as its state.
-	return pulumi.ConstructResult{
-		URN: staticPage.URN(),
-		State: pulumi.Map{
-			"bucket":     staticPage.Bucket,
-			"websiteUrl": staticPage.WebsiteUrl,
-		},
-	}, nil
+	// Return the component resource's URN and state. `NewConstructResult` automatically sets the
+	// ConstructResult's state based on resource struct fields tagged with `pulumi:` tags with a value
+	// that is convertible to `pulumi.Input`.
+	return provider.NewConstructResult(staticPage)
 }
 ```
