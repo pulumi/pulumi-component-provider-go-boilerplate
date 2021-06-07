@@ -26,10 +26,13 @@ type StaticPageArgs struct {
 }
 
 // The StaticPage component resource.
+//pulumi:xyz:index:StaticPage
 type StaticPage struct {
 	pulumi.ResourceState
 
-	Bucket     *s3.Bucket          `pulumi:"bucket"`
+	// The bucket resource.
+	Bucket *s3.Bucket `pulumi:"bucket"`
+	// The URL to the page.
 	WebsiteUrl pulumi.StringOutput `pulumi:"websiteUrl"`
 }
 

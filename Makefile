@@ -21,23 +21,29 @@ install:: install_provider install_dotnet_sdk install_nodejs_sdk
 
 build_provider::
 	rm -rf ${WORKING_DIR}/bin/${PROVIDER}
-	cd provider/cmd/${PROVIDER} && VERSION=${VERSION} SCHEMA=${SCHEMA_PATH} go generate main.go
 	cd provider/cmd/${PROVIDER} && go build -a -o ${WORKING_DIR}/bin/${PROVIDER} -ldflags "-X ${PROJECT}/${VERSION_PATH}=${VERSION}" .
 
 install_provider:: build_provider
 	cp ${WORKING_DIR}/bin/${PROVIDER} ${GOPATH}/bin
 
 
+# Schema
+
+schema:: build_provider
+	${WORKING_DIR}/bin/${PROVIDER} -schema > ${WORKING_DIR}/schema.json
+#${WORKING_DIR}/bin/${PROVIDER} -schema
+
+
 # Go SDK
 
-gen_go_sdk::
+gen_go_sdk:: schema
 	rm -rf sdk/go
 	cd provider/cmd/${CODEGEN} && go run . go ../../../sdk/go ${SCHEMA_PATH}
 
 
 # .NET SDK
 
-gen_dotnet_sdk::
+gen_dotnet_sdk:: schema
 	rm -rf sdk/dotnet
 	cd provider/cmd/${CODEGEN} && go run . dotnet ../../../sdk/dotnet ${SCHEMA_PATH}
 
@@ -55,7 +61,7 @@ install_dotnet_sdk:: build_dotnet_sdk
 
 # Node.js SDK
 
-gen_nodejs_sdk::
+gen_nodejs_sdk:: schema
 	rm -rf sdk/nodejs
 	cd provider/cmd/${CODEGEN} && go run . nodejs ../../../sdk/nodejs ${SCHEMA_PATH}
 
@@ -74,7 +80,7 @@ install_nodejs_sdk:: build_nodejs_sdk
 
 # Python SDK
 
-gen_python_sdk::
+gen_python_sdk:: schema
 	rm -rf sdk/python
 	cd provider/cmd/${CODEGEN} && go run . python ../../../sdk/python ${SCHEMA_PATH}
 	cp ${WORKING_DIR}/README.md sdk/python

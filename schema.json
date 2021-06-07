@@ -1,8 +1,24 @@
 {
     "name": "xyz",
+    "config": {},
+    "provider": {},
     "resources": {
         "xyz:index:StaticPage": {
-            "isComponent": true,
+            "description": "The StaticPage component resource.",
+            "properties": {
+                "bucket": {
+                    "$ref": "/aws/v4.0.0/schema.json#/resources/aws:s3%2Fbucket:Bucket",
+                    "description": "The bucket resource."
+                },
+                "websiteUrl": {
+                    "type": "string",
+                    "description": "The URL to the page."
+                }
+            },
+            "required": [
+                "bucket",
+                "websiteUrl"
+            ],
             "inputProperties": {
                 "indexContent": {
                     "type": "string",
@@ -12,20 +28,7 @@
             "requiredInputs": [
                 "indexContent"
             ],
-            "properties": {
-                "bucket": {
-                    "$ref": "/aws/v4.0.0/schema.json#/resources/aws:s3%2Fbucket:Bucket",
-                    "description": "The bucket resource."
-                },
-                "websiteUrl": {
-                    "type": "string",
-                    "description": "The website URL."
-                }
-            },
-            "required": [
-                "bucket",
-                "websiteUrl"
-            ]
+            "isComponent": true
         }
     },
     "language": {
@@ -36,8 +39,7 @@
             }
         },
         "go": {
-            "generateResourceContainerTypes": true,
-            "importBasePath": "github.com/pulumi/pulumi-xyz/sdk/go/xyz"
+            "generateResourceContainerTypes": true
         },
         "nodejs": {
             "dependencies": {
@@ -48,9 +50,10 @@
             }
         },
         "python": {
+            "readme": "",
             "requires": {
-                "pulumi": ">=3.0.0,<4.0.0",
-                "pulumi-aws": ">=4.0.0,<5.0.0"
+                "pulumi": "\u003e=3.0.0,\u003c4.0.0",
+                "pulumi-aws": "\u003e=4.0.0,\u003c5.0.0"
             }
         }
     }

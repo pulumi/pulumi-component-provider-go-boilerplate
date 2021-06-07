@@ -42,7 +42,8 @@ class StaticPage(pulumi.ComponentResource):
                  index_content: Optional[pulumi.Input[str]] = None,
                  __props__=None):
         """
-        Create a StaticPage resource with the given unique name, props, and options.
+        The StaticPage component resource.
+
         :param str resource_name: The name of the resource.
         :param pulumi.ResourceOptions opts: Options for the resource.
         :param pulumi.Input[str] index_content: The HTML content for index.html.
@@ -54,7 +55,8 @@ class StaticPage(pulumi.ComponentResource):
                  args: StaticPageArgs,
                  opts: Optional[pulumi.ResourceOptions] = None):
         """
-        Create a StaticPage resource with the given unique name, props, and options.
+        The StaticPage component resource.
+
         :param str resource_name: The name of the resource.
         :param StaticPageArgs args: The arguments to use to populate this resource's properties.
         :param pulumi.ResourceOptions opts: Options for the resource.
@@ -109,7 +111,7 @@ class StaticPage(pulumi.ComponentResource):
     @pulumi.getter(name="websiteUrl")
     def website_url(self) -> pulumi.Output[str]:
         """
-        The website URL.
+        The URL to the page.
         """
         return pulumi.get(self, "website_url")
 

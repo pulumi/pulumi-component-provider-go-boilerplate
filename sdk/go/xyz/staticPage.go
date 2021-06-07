@@ -12,12 +12,13 @@ import (
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
 
+// The StaticPage component resource.
 type StaticPage struct {
 	pulumi.ResourceState
 
 	// The bucket resource.
 	Bucket s3.BucketOutput `pulumi:"bucket"`
-	// The website URL.
+	// The URL to the page.
 	WebsiteUrl pulumi.StringOutput `pulumi:"websiteUrl"`
 }
 

@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:generate go run ./generate.go
-
 package main
 
 import (
@@ -24,5 +22,5 @@ import (
 var providerName = "xyz"
 
 func main() {
-	provider.Serve(providerName, version.Version, pulumiSchema)
+	provider.Serve(providerName, version.Version)
 }

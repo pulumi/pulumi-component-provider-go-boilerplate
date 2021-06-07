@@ -19,10 +19,14 @@ import (
 	"github.com/pulumi/pulumi/sdk/v3/go/common/util/cmdutil"
 )
 
+// The components to make available in this provider.
+var components = []interface{}{
+	NewStaticPage,
+}
+
 // Serve launches the gRPC server for the resource provider.
-func Serve(providerName, version string, schema []byte) {
-	// Start gRPC service.
-	if err := provider.ComponentMain(providerName, version, schema, construct); err != nil {
+func Serve(providerName, version string) {
+	if err := provider.ComponentMainAuto(providerName, version, components...); err != nil {
 		cmdutil.ExitError(err.Error())
 	}
 }

@@ -9,6 +9,9 @@ using Pulumi.Serialization;
 
 namespace Pulumi.Xyz
 {
+    /// <summary>
+    /// The StaticPage component resource.
+    /// </summary>
     [XyzResourceType("xyz:index:StaticPage")]
     public partial class StaticPage : Pulumi.ComponentResource
     {
@@ -19,7 +22,7 @@ namespace Pulumi.Xyz
         public Output<Pulumi.Aws.S3.Bucket> Bucket { get; private set; } = null!;
 
         /// <summary>
-        /// The website URL.
+        /// The URL to the page.
         /// </summary>
         [Output("websiteUrl")]
         public Output<string> WebsiteUrl { get; private set; } = null!;

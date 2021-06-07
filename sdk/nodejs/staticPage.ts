@@ -6,6 +6,9 @@ import * as utilities from "./utilities";
 
 import * as aws from "@pulumi/aws";
 
+/**
+ * The StaticPage component resource.
+ */
 export class StaticPage extends pulumi.ComponentResource {
     /** @internal */
     public static readonly __pulumiType = 'xyz:index:StaticPage';
@@ -26,7 +29,7 @@ export class StaticPage extends pulumi.ComponentResource {
      */
     public /*out*/ readonly bucket!: pulumi.Output<aws.s3.Bucket>;
     /**
-     * The website URL.
+     * The URL to the page.
      */
     public /*out*/ readonly websiteUrl!: pulumi.Output<string>;
 
@@ -65,5 +68,5 @@ export interface StaticPageArgs {
     /**
      * The HTML content for index.html.
      */
-    readonly indexContent: pulumi.Input<string>;
+    indexContent: pulumi.Input<string>;
 }

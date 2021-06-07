@@ -6,5 +6,9 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/pulumi/pulumi-aws/sdk/v4 v4.0.0
 	github.com/pulumi/pulumi/pkg/v3 v3.0.1-0.20210419234039-6a33b4b7ee41
-	github.com/pulumi/pulumi/sdk/v3 v3.0.0
+	github.com/pulumi/pulumi/sdk/v3 v3.3.1
 )
+
+replace github.com/pulumi/pulumi/pkg/v3 => ../../pulumi/pkg
+
+replace github.com/pulumi/pulumi/sdk/v3 => ../../pulumi/sdk
