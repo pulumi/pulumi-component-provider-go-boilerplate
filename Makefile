@@ -10,6 +10,8 @@ VERSION_PATH    := provider/pkg/version.Version
 WORKING_DIR     := $(shell pwd)
 SCHEMA_PATH     := ${WORKING_DIR}/schema.json
 
+GOPATH          := $(shell go env GOPATH)
+
 generate:: gen_go_sdk gen_dotnet_sdk gen_nodejs_sdk gen_python_sdk
 
 build:: build_provider build_dotnet_sdk build_nodejs_sdk build_python_sdk
@@ -69,6 +71,7 @@ build_nodejs_sdk:: gen_nodejs_sdk
 		rm ./bin/package.json.bak
 
 install_nodejs_sdk:: build_nodejs_sdk
+	yarn unlink ${PACK}
 	yarn link --cwd ${WORKING_DIR}/sdk/nodejs/bin
 
 
