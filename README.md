@@ -6,7 +6,7 @@ An example `StaticPage` [component resource](https://www.pulumi.com/docs/intro/c
 
 The component provider makes component resources available to other languages. The implementation is in `provider/pkg/provider/provider.go`. Each component resource in the provider must have an implementation in the `Construct` function to create an instance of the requested component resource and return its `URN` and state (outputs). There is an initial implementation that demonstrates an implementation of `Construct` for the example `StaticPage` component.
 
-A code generator is available which generates SDKs in TypeScript, Python, Go and .NET which are also checked in to the `sdk` folder. The SDKs are generated from a schema in `schema.json`. This file should be kept aligned with the component resources supported by the component provider implementation.
+A code generator is available which generates SDKs in TypeScript, Python, Go and .NET which are also checked in to the `sdk` folder. The SDKs are generated from a schema in `schema.yaml`. This file should be kept aligned with the component resources supported by the component provider implementation.
 
 An example of using the `StaticPage` component in TypeScript is in `examples/simple`.
 
@@ -52,37 +52,28 @@ Let's look at the example `StaticPage` component resource in more detail.
 
 ### Schema
 
-The example `StaticPage` component resource is defined in `schema.json`:
+The example `StaticPage` component resource is defined in `schema.yaml`:
 
-```json
-"resources": {
-    "xyz:index:StaticPage": {
-        "isComponent": true,
-        "inputProperties": {
-            "indexContent": {
-                "type": "string",
-                "description": "The HTML content for index.html."
-            }
-        },
-        "requiredInputs": [
-            "indexContent"
-        ],
-        "properties": {
-            "bucket": {
-                "$ref": "/aws/v3.30.0/schema.json#/resources/aws:s3%2Fbucket:Bucket",
-                "description": "The bucket resource."
-            },
-            "websiteUrl": {
-                "type": "string",
-                "description": "The website URL."
-            }
-        },
-        "required": [
-            "bucket",
-            "websiteUrl"
-        ]
-    }
-}
+```yaml
+resources:
+  xyz:index:StaticPage:
+    isComponent: true
+    inputProperties:
+      indexContent:
+        type: string
+        description: The HTML content for index.html.
+    requiredInputs:
+      - indexContent
+    properties:
+      bucket:
+        "$ref": "/aws/v4.0.0/schema.json#/resources/aws:s3%2Fbucket:Bucket"
+        description: The bucket resource.
+      websiteUrl:
+        type: string
+        description: The website URL.
+    required:
+      - bucket
+      - websiteUrl
 ```
 
 The component resource's type token is `xyz:index:StaticPage` in the format of `<package>:<module>:<type>`. In this case, it's in the `xyz` package and `index` module. This is the same type token passed to `RegisterComponentResource` inside the implementation of `NewStaticPage` in `provider/pkg/provider/staticPage.go`, and also the same token referenced in `Construct` in `provider/pkg/provider/provider.go`.
@@ -91,49 +82,44 @@ This component has a required `indexContent` input property typed as `string`, a
 
 Since this component returns a type from the `aws` provider, each SDK must reference the associated Pulumi `aws` SDK for the language. For the .NET, Node.js, and Python SDKs, dependencies are specified in the `language` section of the schema:
 
-```json
-"language": {
-    "csharp": {
-        "packageReferences": {
-            "Pulumi": "2.*",
-            "Pulumi.Aws": "3.*"
-        }
-    },
-    "nodejs": {
-        "dependencies": {
-            "@pulumi/aws": "^3.30.0"
-        },
-        "devDependencies": {
-            "typescript": "^3.7.0"
-        }
-    },
-    "python": {
-        "requires": {
-            "pulumi": ">=2.21.2,<3.0.0",
-            "pulumi-aws": ">=3.30.0,<4.0.0"
-        }
-    }
-}
+```yaml
+language:
+  csharp:
+    packageReferences:
+      Pulumi: 3.*
+      Pulumi.Aws: 4.*
+  go:
+    generateResourceContainerTypes: true
+    importBasePath: github.com/pulumi/pulumi-xyz/sdk/go/xyz
+  nodejs:
+    dependencies:
+      "@pulumi/aws": "^4.0.0"
+    devDependencies:
+      typescript: "^3.7.0"
+  python:
+    requires:
+      pulumi: ">=3.0.0,<4.0.0"
+      pulumi-aws: ">=4.0.0,<5.0.0"
 ```
 
 For the Go SDK, dependencies are specified in the `sdk/go.mod` file.
 
 ### Implementation
 
-The implementation of this component is in `provider/pkg/provider/staticPage.go` and the structure of the component's inputs and outputs aligns with what is defined in `schema.json`:
+The implementation of this component is in `provider/pkg/provider/staticPage.go` and the structure of the component's inputs and outputs aligns with what is defined in `schema.yaml`:
 
 ```go
 // The set of arguments for creating a StaticPage component resource.
 type StaticPageArgs struct {
-	IndexContent pulumi.StringInput `pulumi:"indexContent"`
+    IndexContent pulumi.StringInput `pulumi:"indexContent"`
 }
 
 // The StaticPage component resource.
 type StaticPage struct {
-	pulumi.ResourceState
+    pulumi.ResourceState
 
-	Bucket     *s3.Bucket          `pulumi:"bucket"`
-	WebsiteUrl pulumi.StringOutput `pulumi:"websiteUrl"`
+    Bucket     *s3.Bucket          `pulumi:"bucket"`
+    WebsiteUrl pulumi.StringOutput `pulumi:"websiteUrl"`
 }
 
 // NewStaticPage creates a new StaticPage component resource.
@@ -144,27 +130,26 @@ func NewStaticPage(ctx *pulumi.Context, name string, args *StaticPageArgs, opts 
 
 The provider makes this component resource available in the `construct` function in `provider/pkg/provider/provider.go`. When `construct` is called and the `typ` argument is `xyz:index:StaticPage`, we create an instance of the `StaticPage` component resource and return its `URN` and state.
 
-
 ```go
 func constructStaticPage(ctx *pulumi.Context, name string, inputs provider.ConstructInputs,
-	options pulumi.ResourceOption) (*provider.ConstructResult, error) {
+    options pulumi.ResourceOption) (*provider.ConstructResult, error) {
 
-	// Copy the raw inputs to StaticPageArgs. `inputs.CopyTo` uses the types and `pulumi:` tags
-	// on the struct's fields to convert the raw values to the appropriate Input types.
-	args := &StaticPageArgs{}
-	if err := inputs.CopyTo(args); err != nil {
-		return nil, errors.Wrap(err, "setting args")
-	}
+    // Copy the raw inputs to StaticPageArgs. `inputs.CopyTo` uses the types and `pulumi:` tags
+    // on the struct's fields to convert the raw values to the appropriate Input types.
+    args := &StaticPageArgs{}
+    if err := inputs.CopyTo(args); err != nil {
+        return nil, errors.Wrap(err, "setting args")
+    }
 
-	// Create the component resource.
-	staticPage, err := NewStaticPage(ctx, name, args, options)
-	if err != nil {
-		return nil, errors.Wrap(err, "creating component")
-	}
+    // Create the component resource.
+    staticPage, err := NewStaticPage(ctx, name, args, options)
+    if err != nil {
+        return nil, errors.Wrap(err, "creating component")
+    }
 
-	// Return the component resource's URN and state. `NewConstructResult` automatically sets the
-	// ConstructResult's state based on resource struct fields tagged with `pulumi:` tags with a value
-	// that is convertible to `pulumi.Input`.
-	return provider.NewConstructResult(staticPage)
+    // Return the component resource's URN and state. `NewConstructResult` automatically sets the
+    // ConstructResult's state based on resource struct fields tagged with `pulumi:` tags with a value
+    // that is convertible to `pulumi.Input`.
+    return provider.NewConstructResult(staticPage)
 }
 ```

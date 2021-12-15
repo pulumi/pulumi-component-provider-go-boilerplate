@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//go:build ignore
 // +build ignore
 
 package main
@@ -22,7 +23,9 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"strings"
 
+	"github.com/ghodss/yaml"
 	"github.com/pulumi/pulumi/pkg/v3/codegen/schema"
 )
 
@@ -40,6 +43,13 @@ func main() {
 	schemaContents, err := ioutil.ReadFile(schemaPath)
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	if strings.HasSuffix(schemaPath, ".yaml") {
+		schemaContents, err = yaml.YAMLToJSON(schemaContents)
+		if err != nil {
+			log.Fatalf("reading YAML schema: %v", err)
+		}
 	}
 
 	var packageSpec schema.PackageSpec
