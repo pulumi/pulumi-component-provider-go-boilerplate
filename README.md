@@ -1,6 +1,13 @@
-# xyz Pulumi Component Provider (Go)
+# Pulumi Component Provider Boilerplate (Go)
 
 This repo is a boilerplate showing how to create a Pulumi component provider written in Go. You can search-replace `xyz` with the name of your desired provider as a starting point for creating a component provider for your component resources.
+
+## Background
+This repository is part of the [guide for authoring and publishing a Pulumi Package](https://www.pulumi.com/docs/guides/pulumi-packages/how-to-author).
+
+Learn about the concepts behind [Pulumi Packages](https://www.pulumi.com/docs/guides/pulumi-packages/#pulumi-packages) and, more specifically, [Pulumi Components](https://www.pulumi.com/docs/intro/concepts/resources/components/)
+
+## Sample xyz Component Provider
 
 An example `StaticPage` [component resource](https://www.pulumi.com/docs/intro/concepts/resources/#components) is available in `provider/pkg/provider/staticPage.go`. This component creates a static web page hosted in an AWS S3 Bucket. There is nothing special about `StaticPage` -- it is a typical component resource written in Go.
 
@@ -45,6 +52,10 @@ $ pulumi up
 The `xyz` provider's plugin binary must be named `pulumi-resource-xyz` (in the format `pulumi-resource-<provider>`).
 
 While the provider plugin must follow this naming convention, the SDK package naming can be customized. TODO explain.
+
+## Configuring CI and releases
+
+1. Follow the instructions laid out in the [deployment templates](./deployment-templates/README-DEPLOYMENT.md).
 
 ## Example component
 
