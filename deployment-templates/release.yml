@@ -59,7 +59,7 @@ jobs:
   publish_sdk:
     name: Publish SDKs
     runs-on: ubuntu-latest
-    needs: publish_binary
+    needs: publish
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v2
