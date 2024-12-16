@@ -1,3 +1,6 @@
+> [!WARNING]
+> This boilerplate repo is deprecated. New component providers in go should instead start with the [pulumi/pulumi-provider-boilerplate](https://github.com/pulumi/pulumi-provider-boilerplate/) which is based on the [pulumi-go-proivder](https://github.com/pulumi/pulumi-go-provider) SDK and supports both CustomResources and ComponentResources.
+
 # Pulumi Component Provider Boilerplate (Go)
 
 This repo is a boilerplate showing how to create a Pulumi component provider written in Go. You can search-replace `xyz` with the name of your desired provider as a starting point for creating a component provider for your component resources.
