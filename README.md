@@ -1,5 +1,5 @@
 > [!WARNING]
-> This boilerplate repo is deprecated. New component providers in go should instead start with the [pulumi/pulumi-provider-boilerplate](https://github.com/pulumi/pulumi-provider-boilerplate/) which is based on the [pulumi-go-proivder](https://github.com/pulumi/pulumi-go-provider) SDK and supports both CustomResources and ComponentResources.
+> This boilerplate repo is deprecated. New component providers in go should instead start with the [pulumi/pulumi-provider-boilerplate](https://github.com/pulumi/pulumi-provider-boilerplate/) which is based on the [pulumi-go-provider](https://github.com/pulumi/pulumi-go-provider) SDK and supports both CustomResources and ComponentResources.
 
 # Pulumi Component Provider Boilerplate (Go)
 
